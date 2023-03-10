@@ -1,33 +1,89 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchEpisodios } from '../store/episodiosSlice';
-import { RootState } from '../store';
-import { Episodios } from '../types/episodios';
+import { useEffect, useState } from "react";
+import { getWidthRange, getMarginRange } from "../utils/utilsFunctions";
 
-export default function Home() {
-  const dispatch = useDispatch();
-  const { data, loading, error } = useSelector(
-    (state: RootState) => state.episodios
-  );
+function NormalSlider() {
+  const [rightValue, setRightValue] = useState(1000);
+  const [leftValue, setLeftValue] = useState(0);
+  const [draggingLeft, setDraggingLeft] = useState(false);
+  const [draggingRight, setDraggingRight] = useState(false);
 
-  useEffect(() => {
-    dispatch(fetchEpisodios());
-  }, [dispatch]);
+  function handleMouseDownLeft() {
+    setDraggingLeft(true);
+  }
+
+  function handleMouseDownRight() {
+    setDraggingRight(true);
+  }
+
+  function handleMouseUp() {
+    setDraggingLeft(false);
+    setDraggingRight(false);
+  }
+
+  function handleMouseMove(event) {
+    if (draggingLeft) {
+      const x = event.clientX;
+      const rect = event.target.getBoundingClientRect();
+      const left = x - rect.left;
+      const percentage = (left / rect.width) * 100;
+      const newValue = Math.min(rightValue - 1, Math.round((percentage / 100) * 1000));
+      setLeftValue(newValue);
+    } else if (draggingRight) {
+      const x = event.clientX;
+      const rect = event.target.getBoundingClientRect();
+      const left = x - rect.left;
+      const percentage = (left / rect.width) * 100;
+      const newValue = Math.max(leftValue + 1, Math.round((percentage / 100) * 1000));
+      setRightValue(newValue);
+    }
+  }
 
   return (
-    <>
-      <div>
-        {loading && <p>Loading...</p>}
-        {error && <p>{error}</p>}
-        {!loading &&
-          data.map((episodio: Episodios, index: number) => (
-            <article key={index}>
-              <h1>{episodio.name}</h1>
-              <h1>{episodio.image}</h1>
-            </article>
-          ))}
-      </div>
-    </>
+    <div className="slider">
+      <table onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}>
+        <tbody>
+          <tr key="tr1">
+            <td key="td1">
+              <p className="numberSlice">{`${leftValue}`}</p>
+            </td>
+            <td key="td2">
+              <div className="divTrSlice">
+                <div
+                  className="bullet bullet--left"
+                  style={{
+                    left: `${(leftValue / 1000) * 100}%`,
+                    zIndex: draggingLeft ? 2 : 1,
+                  }}
+                  onMouseDown={handleMouseDownLeft}
+                />
+                <div className="bullet--line" />
+                <div
+                  className="bullet--line2"
+                  style={{
+                    width: `${getWidthRange(rightValue, leftValue)}%`,
+                    marginLeft: `${getMarginRange(leftValue)}%`,
+                  }}
+                />
+                <div
+                  className="bullet bullet--right"
+                  style={{
+                    left: `${(rightValue / 1000) * 100}%`,
+                    zIndex: draggingRight ? 2 : 1,
+                  }}
+                  onMouseDown={handleMouseDownRight}
+                />
+              </div>
+            </td>
+            <td key="td3">
+              <p className="numberSlice">{`${rightValue}`}</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   );
 }
+
+export default NormalSlider;
+
 

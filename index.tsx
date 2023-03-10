@@ -4,94 +4,45 @@ import { getWidthRange, getMarginRange } from "../utils/utilsFunctions";
 function NormalSlider() {
   const [rightValue, setRightValue] = useState(1000);
   const [leftValue, setLeftValue] = useState(0);
-  const [draggingLeft, setDraggingLeft] = useState(false);
-  const [draggingRight, setDraggingRight] = useState(false);
 
-  useEffect(() => {
-    function handleMouseMove(event) {
-      if (draggingLeft) {
-        const x = event.clientX;
-        const rect = event.target.getBoundingClientRect();
-        const left = x - rect.left;
-        const percentage = (left / rect.width) * 100;
-        const newValue = Math.min(rightValue - 1, Math.round((percentage / 100) * 1000));
-        setLeftValue(newValue);
-      } else if (draggingRight) {
-        const x = event.clientX;
-        const rect = event.target.getBoundingClientRect();
-        const left = x - rect.left;
-        const percentage = (left / rect.width) * 100;
-        const newValue = Math.max(leftValue + 1, Math.round((percentage / 100) * 1000));
-        setRightValue(newValue);
-      }
+  const handleLeftMove = () => {
+    if (leftValue < rightValue) {
+      setLeftValue(leftValue + 1);
     }
+  };
 
-    function handleMouseUp() {
-      setDraggingLeft(false);
-      setDraggingRight(false);
+  const handleRightMove = () => {
+    if (rightValue > leftValue) {
+      setRightValue(rightValue - 1);
     }
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [draggingLeft, draggingRight, leftValue, rightValue]);
-
-  function handleMouseDownLeft() {
-    setDraggingLeft(true);
-  }
-
-  function handleMouseDownRight() {
-    setDraggingRight(true);
-  }
+  };
 
   return (
     <div className="slider">
-      <table>
+      <table >
         <tbody>
-          <tr key="tr1">
-            <td key="td1">
-              <p className="numberSlice">{`${leftValue}`}</p>
-            </td>
-            <td key="td2">
-              <div className="divTrSlice">
-                <div
-                  className="bullet bullet--left"
-                  style={{
-                    left: `${(leftValue / 1000) * 100}%`,
-                    zIndex: draggingLeft ? 2 : 1,
-                  }}
-                  onMouseDown={handleMouseDownLeft}
-                />
-                <div className="bullet--line" />
-                <div
-                  className="bullet--line2"
-                  style={{
-                    width: `${getWidthRange(rightValue, leftValue)}%`,
-                    marginLeft: `${getMarginRange(leftValue)}%`,
-                  }}
-                />
-                <div
-                  className="bullet bullet--right"
-                  style={{
-                    left: `${(rightValue / 1000) * 100}%`,
-                    zIndex: draggingRight ? 2 : 1,
-                  }}
-                  onMouseDown={handleMouseDownRight}
-                />
-              </div>
-            </td>
-            <td key="td3">
-              <p className="numberSlice">{`${rightValue}`}</p>
-            </td>
-          </tr>
+        <tr key="tr1">
+          <td key="td1"><p className="numberSlice">{`${leftValue}`}</p></td>
+          <td key="td2">
+            <div className="divTrSlice">
+              <button onClick={handleLeftMove} className="bullet bullet--left">&#60;</button>
+              <div className="bullet--line" />
+              <div
+                style={{
+                  width: getWidthRange(rightValue, leftValue),
+                  marginLeft: getMarginRange(leftValue),
+                }}
+                className="bullet--line2"
+              />
+              <button onClick={handleRightMove} className="bullet bullet--right">&#62;</button>
+            </div>
+          </td>
+          <td key="td3"><p className="numberSlice">{`${rightValue}`}</p></td>
+        </tr>
         </tbody>
       </table>
     </div>
   );
 }
 
-export default
+export default NormalSlider;

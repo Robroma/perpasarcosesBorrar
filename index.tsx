@@ -7,6 +7,39 @@ function NormalSlider() {
   const [draggingLeft, setDraggingLeft] = useState(false);
   const [draggingRight, setDraggingRight] = useState(false);
 
+  useEffect(() => {
+    function handleMouseMove(event) {
+      if (draggingLeft) {
+        const x = event.clientX;
+        const rect = event.target.getBoundingClientRect();
+        const left = x - rect.left;
+        const percentage = (left / rect.width) * 100;
+        const newValue = Math.min(rightValue - 1, Math.round((percentage / 100) * 1000));
+        setLeftValue(newValue);
+      } else if (draggingRight) {
+        const x = event.clientX;
+        const rect = event.target.getBoundingClientRect();
+        const left = x - rect.left;
+        const percentage = (left / rect.width) * 100;
+        const newValue = Math.max(leftValue + 1, Math.round((percentage / 100) * 1000));
+        setRightValue(newValue);
+      }
+    }
+
+    function handleMouseUp() {
+      setDraggingLeft(false);
+      setDraggingRight(false);
+    }
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [draggingLeft, draggingRight, leftValue, rightValue]);
+
   function handleMouseDownLeft() {
     setDraggingLeft(true);
   }
@@ -15,32 +48,9 @@ function NormalSlider() {
     setDraggingRight(true);
   }
 
-  function handleMouseUp() {
-    setDraggingLeft(false);
-    setDraggingRight(false);
-  }
-
-  function handleMouseMove(event) {
-    if (draggingLeft) {
-      const x = event.clientX;
-      const rect = event.target.getBoundingClientRect();
-      const left = x - rect.left;
-      const percentage = (left / rect.width) * 100;
-      const newValue = Math.min(rightValue - 1, Math.round((percentage / 100) * 1000));
-      setLeftValue(newValue);
-    } else if (draggingRight) {
-      const x = event.clientX;
-      const rect = event.target.getBoundingClientRect();
-      const left = x - rect.left;
-      const percentage = (left / rect.width) * 100;
-      const newValue = Math.max(leftValue + 1, Math.round((percentage / 100) * 1000));
-      setRightValue(newValue);
-    }
-  }
-
   return (
     <div className="slider">
-      <table onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}>
+      <table>
         <tbody>
           <tr key="tr1">
             <td key="td1">
@@ -84,6 +94,4 @@ function NormalSlider() {
   );
 }
 
-export default NormalSlider;
-
-
+export default

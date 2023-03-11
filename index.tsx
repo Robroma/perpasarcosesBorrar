@@ -1,33 +1,33 @@
-import { useEffect, useState } from "react";
-import { getWidthRange, getMarginRange } from "../utils/utilsFunctions";
-
 function NormalSlider() {
   const [rightValue, setRightValue] = useState(1000);
   const [leftValue, setLeftValue] = useState(0);
   const [draggingLeft, setDraggingLeft] = useState(false);
   const [draggingRight, setDraggingRight] = useState(false);
+  const [mousePos, setMousePos] = useState(0);
 
-  const handleMouseDownLeft = () => {
+  const handleMouseDownLeft = (e) => {
     setDraggingLeft(true);
+    setMousePos(e.clientX);
   };
 
-  const handleMouseDownRight = () => {
+  const handleMouseDownRight = (e) => {
     setDraggingRight(true);
+    setMousePos(e.clientX);
   };
 
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (draggingLeft) {
-        const newValue = leftValue + e.movementX;
-        if (newValue >= 0 && newValue < rightValue) {
-          setLeftValue(newValue);
-        }
+        const diff = e.clientX - mousePos;
+        const newLeft = Math.min(Math.max(leftValue + diff, 0), rightValue);
+        setLeftValue(newLeft);
+        setMousePos(e.clientX);
       }
       if (draggingRight) {
-        const newValue = rightValue - e.movementX;
-        if (newValue > leftValue && newValue <= 1000) {
-          setRightValue(newValue);
-        }
+        const diff = e.clientX - mousePos;
+        const newRight = Math.min(Math.max(rightValue + diff, leftValue), 1000);
+        setRightValue(newRight);
+        setMousePos(e.clientX);
       }
     };
     const handleMouseUp = () => {
@@ -40,47 +40,38 @@ function NormalSlider() {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [draggingLeft, draggingRight, leftValue, rightValue]);
+  }, [draggingLeft, draggingRight, leftValue, rightValue, mousePos]);
 
   return (
     <div className="slider">
-      <table >
-        <tbody>
-        <tr key="tr1">
-          <td key="td1"><p className="numberSlice">{`${leftValue}`}</p></td>
-          <td key="td2">
-            <div className="divTrSlice">
-              <button
-                onMouseDown={handleMouseDownLeft}
-                className="bullet bullet--left"
-                style={{ marginLeft: getMarginRange(leftValue) }}
-              >
-                &#60;
-              </button>
-              <div className="bullet--line" />
-              <div
-                style={{
-                  width: getWidthRange(rightValue, leftValue),
-                  marginLeft: getMarginRange(leftValue),
-                }}
-                className="bullet--line2"
-              />
-              <button
-                onMouseDown={handleMouseDownRight}
-                className="bullet bullet--right"
-                style={{ marginLeft: getMarginRange(rightValue) }}
-              >
-                &#62;
-              </button>
-            </div>
-          </td>
-          <td key="td3"><p className="numberSlice">{`${rightValue}`}</p></td>
-        </tr>
-        </tbody>
-      </table>
+      <p className="numberSlice">{`${leftValue}`}</p>
+
+      <div className="divTrSlice">
+        <button
+          onMouseDown={handleMouseDownLeft}
+          className="bullet bullet--left"
+          style={{ marginLeft: getMarginRange(leftValue) }}
+        >
+          x
+        </button>
+        <div className="bullet--line" />
+        <div
+          style={{
+            width: getWidthRange(rightValue, leftValue),
+            marginLeft: getMarginRange(leftValue),
+          }}
+          className="bullet--line2"
+        />
+        <button
+          onMouseDown={handleMouseDownRight}
+          className="bullet bullet--right"
+          style={{ marginLeft: getMarginRange(rightValue) }}
+        >
+          x
+        </button>
+      </div>
+      <p className="numberSlice">{`${rightValue}`}</p>
     </div>
   );
 }
-
-export default NormalSlider;
 
